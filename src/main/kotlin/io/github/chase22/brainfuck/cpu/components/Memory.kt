@@ -25,9 +25,15 @@ class Memory(private val memoryCounter: Counter) {
     }
 
     fun print() {
-        println("\t" + (0..9).joinToString("\t"))
-        println(memory.toList().chunked(10).map { it.joinToString("\t") }.mapIndexed {idx, value ->
-            "${idx*10}\t$value"
-        }.joinToString("\n"))
+        println("    " + (0..9).joinToString(" ", transform = this::cell))
+        println(memory.toList().chunked(10)
+            .map { it.joinToString(" ", transform = this::cell) }
+            .mapIndexed { idx, value ->
+                "${cell(idx * 10)} $value"
+            }.joinToString("\n")
+        )
     }
+
+    fun cell(value: Int): String = value.toString().padStart(3)
+    fun cell(value: ByteInt): String = cell(value.toInt())
 }
