@@ -1,9 +1,10 @@
 package io.github.chase22.brainfuck.cpu.components
 
+import io.github.chase22.brainfuck.cpu.InstructionSet
 import io.github.chase22.brainfuck.cpu.base.ByteInt
 import io.github.chase22.brainfuck.cpu.base.Counter
 
-class Memory(private val memoryCounter: Counter) {
+open class Memory(private val memoryCounter: Counter) {
     private val memory: Array<ByteInt> = Array(256) { ByteInt(0) }
 
     var currentValue
@@ -36,4 +37,9 @@ class Memory(private val memoryCounter: Counter) {
 
     fun cell(value: Int): String = value.toString().padStart(3)
     fun cell(value: ByteInt): String = cell(value.toInt())
+}
+
+class ProgramMemory(memoryCounter: Counter) : Memory(memoryCounter) {
+    val currentInstruction: InstructionSet
+        get() = InstructionSet.values[currentValue.value]
 }

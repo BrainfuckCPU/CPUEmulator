@@ -1,6 +1,6 @@
 plugins {
     java
-    kotlin("jvm") version "1.4.32"
+    kotlin("jvm") version "1.6.10"
 }
 
 group = "io.github.chase22"
@@ -13,8 +13,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation(kotlin("test-junit5"))
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
