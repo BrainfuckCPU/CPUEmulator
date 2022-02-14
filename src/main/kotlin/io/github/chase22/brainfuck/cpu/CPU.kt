@@ -15,9 +15,16 @@ object CPU {
 
     private val controlLogic = ControlLogic()
 
+    var debugOutput: Boolean = false
+
     fun run() {
         controlLogic.run()
         println()
+    }
+
+    fun loadProgram(program: String) {
+        reset()
+        programMemory.load(assemble(program))
     }
 
     fun reset() {

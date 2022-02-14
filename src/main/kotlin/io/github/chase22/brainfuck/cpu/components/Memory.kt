@@ -5,7 +5,7 @@ import io.github.chase22.brainfuck.cpu.base.ByteInt
 import io.github.chase22.brainfuck.cpu.base.Counter
 
 open class Memory(private val memoryCounter: Counter) {
-    private val memory: Array<ByteInt> = Array(256) { ByteInt(0) }
+    val memory: Array<ByteInt> = Array(256) { ByteInt(0) }
 
     var currentValue
         get() = memory[memoryCounter.currentValue.toInt()]
@@ -35,8 +35,8 @@ open class Memory(private val memoryCounter: Counter) {
         )
     }
 
-    fun cell(value: Int): String = value.toString().padStart(3)
-    fun cell(value: ByteInt): String = cell(value.toInt())
+    private fun cell(value: Int): String = value.toString().padStart(3)
+    private fun cell(value: ByteInt): String = cell(value.toInt())
 }
 
 class ProgramMemory(memoryCounter: Counter) : Memory(memoryCounter) {

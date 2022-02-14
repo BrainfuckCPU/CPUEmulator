@@ -5,17 +5,21 @@ import io.github.chase22.brainfuck.cpu.InstructionSet.*
 
 class ControlLogic {
     fun run() {
-        while(true) {
+        while (true) {
+            val memoryBefore = "${CPU.tapeMemoryCounter.currentValue} : ${CPU.tapeMemory.currentValue}"
             when (CPU.programMemory.currentInstruction) {
                 PLUS -> increment()
                 MINUS -> decrement()
-                NEXT -> shiftLeft()
-                PREVIOUS -> shiftRight()
+                NEXT -> shiftRight()
+                PREVIOUS -> shiftLeft()
                 OUTPUT -> output()
                 INPUT -> input()
                 LOOP_START -> loopStart()
                 LOOP_END -> loopEnd()
                 else -> break
+            }
+            if (CPU.debugOutput) {
+                println("${CPU.programCounter.currentValue}: ${CPU.programMemory.currentInstruction.command} - $memoryBefore -> ${CPU.tapeMemoryCounter.currentValue} : ${CPU.tapeMemory.currentValue}")
             }
             CPU.programCounter.countUp()
         }
@@ -23,16 +27,28 @@ class ControlLogic {
 
     private fun loopStart() {
         if (CPU.tapeMemory.currentValue.value == 0) {
-            while (CPU.programMemory.currentInstruction != LOOP_END) {
+            var loopCounter = 1
+            while (loopCounter != 0) {
                 CPU.programCounter.countUp()
+                if (CPU.programMemory.currentInstruction == LOOP_START) {
+                    loopCounter++
+                } else if (CPU.programMemory.currentInstruction == LOOP_END) {
+                    loopCounter--
+                }
             }
         }
     }
 
     private fun loopEnd() {
         if (CPU.tapeMemory.currentValue.value != 0) {
-            while (CPU.programMemory.currentInstruction != LOOP_START) {
+            var loopCounter = 1
+            while (loopCounter != 0) {
                 CPU.programCounter.countDown()
+                if (CPU.programMemory.currentInstruction == LOOP_START) {
+                    loopCounter--
+                } else if (CPU.programMemory.currentInstruction == LOOP_END) {
+                    loopCounter++
+                }
             }
         }
     }
