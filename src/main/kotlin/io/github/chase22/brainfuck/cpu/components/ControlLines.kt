@@ -18,6 +18,9 @@ object ControlLines {
     var ioUnitIn: Boolean = false
     var ioUnitOut: Boolean = false
 
+    var loopCounterUp: Boolean = false
+    var loopCounterDown: Boolean = false
+
     fun reset() {
         counterUnitUp = false
         counterUnitDown = false
@@ -31,5 +34,7 @@ object ControlLines {
         tapeMemoryCounterDown = false
         ioUnitIn = false
         ioUnitOut = false
+        loopCounterUp = false
+        loopCounterDown = false
     }
 }

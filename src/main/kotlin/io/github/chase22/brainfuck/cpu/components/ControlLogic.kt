@@ -21,21 +21,19 @@ class ControlLogic {
             if (CPU.debugOutput) {
                 println("${CPU.programCounter.currentValue}: ${CPU.programMemory.currentInstruction.command} - $memoryBefore -> ${CPU.tapeMemoryCounter.currentValue} : ${CPU.tapeMemory.currentValue}")
             }
-            ControlLines.programCounterUp = true
-            CPU.tick()
+            programCounterUp()
         }
     }
 
     private fun loopStart() {
         if (CPU.tapeMemory.currentValue.value == 0) {
-            var loopCounter = 1
-            while (loopCounter != 0) {
-                ControlLines.programCounterUp = true
-                CPU.tick()
+            loopCounterUp()
+            while (CPU.loopCounter.isInLoop) {
+                programCounterUp()
                 if (CPU.programMemory.currentInstruction == LOOP_START) {
-                    loopCounter++
+                    loopCounterUp()
                 } else if (CPU.programMemory.currentInstruction == LOOP_END) {
-                    loopCounter--
+                    loopCounterDown()
                 }
             }
         }
@@ -43,65 +41,92 @@ class ControlLogic {
 
     private fun loopEnd() {
         if (CPU.tapeMemory.currentValue.value != 0) {
-            var loopCounter = 1
-            while (loopCounter != 0) {
-                ControlLines.programCounterDown = true
-                CPU.tick()
+            loopCounterUp()
+            while (CPU.loopCounter.isInLoop) {
+                programCounterDown()
                 if (CPU.programMemory.currentInstruction == LOOP_START) {
-                    loopCounter--
+                    loopCounterDown()
                 } else if (CPU.programMemory.currentInstruction == LOOP_END) {
-                    loopCounter++
+                    loopCounterUp()
                 }
             }
         }
     }
 
     fun increment() {
-        ControlLines.tapeMemoryOut = true
-        ControlLines.counterUnitIn = true
-        CPU.tick()
-
-        ControlLines.counterUnitUp = true
-        CPU.tick()
-
-        ControlLines.counterUnitOut = true
-        ControlLines.tapeMemoryIn = true
-        CPU.tick()
+        tapeMemoryToCounterUnit()
+        counterUnitUp()
+        counterUnitToTapeMemory()
 
     }
 
     fun decrement() {
-        ControlLines.tapeMemoryOut = true
-        ControlLines.counterUnitIn = true
-        CPU.tick()
-
-        ControlLines.counterUnitDown = true
-        CPU.tick()
-
-        ControlLines.counterUnitOut = true
-        ControlLines.tapeMemoryIn = true
-        CPU.tick()
+        tapeMemoryToCounterUnit()
+        counterUnitDown()
+        counterUnitToTapeMemory()
     }
 
-    fun shiftLeft() {
+    private fun shiftLeft() {
         ControlLines.tapeMemoryCounterDown = true
         CPU.tick()
     }
 
-    fun shiftRight() {
+    private fun shiftRight() {
         ControlLines.tapeMemoryCounterUp = true
         CPU.tick()
     }
 
-    fun input() {
+    private fun input() {
         ControlLines.tapeMemoryIn = true
         ControlLines.ioUnitOut = true
         CPU.tick()
     }
 
-    fun output() {
+    private fun output() {
         ControlLines.tapeMemoryOut = true
         ControlLines.ioUnitIn = true
+        CPU.tick()
+    }
+
+    private fun tapeMemoryToCounterUnit() {
+        ControlLines.tapeMemoryOut = true
+        ControlLines.counterUnitIn = true
+        CPU.tick()
+    }
+
+    private fun counterUnitToTapeMemory() {
+        ControlLines.counterUnitOut = true
+        ControlLines.tapeMemoryIn = true
+        CPU.tick()
+    }
+
+    private fun programCounterDown() {
+        ControlLines.programCounterDown = true
+        CPU.tick()
+    }
+
+    private fun programCounterUp() {
+        ControlLines.programCounterUp = true
+        CPU.tick()
+    }
+
+    private fun loopCounterUp() {
+        ControlLines.loopCounterUp = true
+        CPU.tick()
+    }
+
+    private fun loopCounterDown() {
+        ControlLines.loopCounterDown = true
+        CPU.tick()
+    }
+
+    private fun counterUnitUp() {
+        ControlLines.counterUnitUp = true
+        CPU.tick()
+    }
+
+    private fun counterUnitDown() {
+        ControlLines.counterUnitDown = true
         CPU.tick()
     }
 }
