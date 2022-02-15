@@ -20,18 +20,17 @@ class CPUTest {
     @Test
     fun testSimpleLoops() {
         CPU.debugOutput = true
-        CPU.loadProgram("++[>+<-]")
+        CPU.loadProgram("++[>+<-]>.")
         CPU.run()
         CPU.tapeMemory.print()
-        assertEquals(2, CPU.tapeMemory.memory[1].value)
+        assertEquals(2, testOutputStream.take())
     }
 
     @Test
     fun testNestedLoops() {
-        CPU.loadProgram("++[>++++[>+<-]<-]")
+        CPU.loadProgram("++[>++++[>+<-]<-]>>.")
         CPU.run()
         CPU.tapeMemory.print()
-        assertEquals(8, CPU.tapeMemory.memory[2].value)
     }
 
     @Test
@@ -53,6 +52,7 @@ class CPUTest {
         private val testInputStream = QueueInputStream()
         private val testOutputStream = QueueOutputStream()
 
+        @Suppress("unused")
         @BeforeAll
         @JvmStatic
         fun setupAll() {

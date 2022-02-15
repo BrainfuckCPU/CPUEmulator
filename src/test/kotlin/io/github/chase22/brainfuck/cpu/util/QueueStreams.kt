@@ -5,20 +5,19 @@ import java.io.OutputStream
 import java.util.concurrent.LinkedBlockingQueue
 
 class QueueOutputStream : OutputStream() {
-    private val queue = LinkedBlockingQueue<Char>()
+    private val queue = LinkedBlockingQueue<Int>()
 
     fun drainToString(): String {
-        val charArray = mutableListOf<Char>()
-        queue.drainTo(charArray)
-        return String(charArray.toCharArray())
+        val array = mutableListOf<Int>()
+        queue.drainTo(array)
+        return String(array.map(Int::toChar).toCharArray())
     }
 
-    fun clear() {
-        queue.clear()
-    }
+    fun clear() = queue.clear()
+    fun take() = queue.take()
 
     override fun write(b: Int) {
-        queue.add(b.toChar())
+        queue.add(b)
     }
 }
 
