@@ -21,7 +21,8 @@ class ControlLogic {
             if (CPU.debugOutput) {
                 println("${CPU.programCounter.currentValue}: ${CPU.programMemory.currentInstruction.command} - $memoryBefore -> ${CPU.tapeMemoryCounter.currentValue} : ${CPU.tapeMemory.currentValue}")
             }
-            CPU.programCounter.countUp()
+            ControlLines.programCounterUp = true
+            CPU.tick()
         }
     }
 
@@ -29,7 +30,8 @@ class ControlLogic {
         if (CPU.tapeMemory.currentValue.value == 0) {
             var loopCounter = 1
             while (loopCounter != 0) {
-                CPU.programCounter.countUp()
+                ControlLines.programCounterUp = true
+                CPU.tick()
                 if (CPU.programMemory.currentInstruction == LOOP_START) {
                     loopCounter++
                 } else if (CPU.programMemory.currentInstruction == LOOP_END) {
@@ -43,7 +45,8 @@ class ControlLogic {
         if (CPU.tapeMemory.currentValue.value != 0) {
             var loopCounter = 1
             while (loopCounter != 0) {
-                CPU.programCounter.countDown()
+                ControlLines.programCounterDown = true
+                CPU.tick()
                 if (CPU.programMemory.currentInstruction == LOOP_START) {
                     loopCounter--
                 } else if (CPU.programMemory.currentInstruction == LOOP_END) {
@@ -54,38 +57,51 @@ class ControlLogic {
     }
 
     fun increment() {
-        memOutCuIn()
-        CPU.counterUnit.increment()
-        CuOutMemIn()
+        ControlLines.tapeMemoryOut = true
+        ControlLines.counterUnitIn = true
+        CPU.tick()
+
+        ControlLines.counterUnitUp = true
+        CPU.tick()
+
+        ControlLines.counterUnitOut = true
+        ControlLines.tapeMemoryIn = true
+        CPU.tick()
+
     }
 
     fun decrement() {
-        memOutCuIn()
-        CPU.counterUnit.decrement()
-        CuOutMemIn()
+        ControlLines.tapeMemoryOut = true
+        ControlLines.counterUnitIn = true
+        CPU.tick()
+
+        ControlLines.counterUnitDown = true
+        CPU.tick()
+
+        ControlLines.counterUnitOut = true
+        ControlLines.tapeMemoryIn = true
+        CPU.tick()
     }
 
     fun shiftLeft() {
-        CPU.tapeMemoryCounter.countDown()
+        ControlLines.tapeMemoryCounterDown = true
+        CPU.tick()
     }
 
     fun shiftRight() {
-        CPU.tapeMemoryCounter.countUp()
+        ControlLines.tapeMemoryCounterUp = true
+        CPU.tick()
     }
 
     fun input() {
-        CPU.tapeMemory.currentValue = CPU.ioUnit.read()
+        ControlLines.tapeMemoryIn = true
+        ControlLines.ioUnitOut = true
+        CPU.tick()
     }
 
     fun output() {
-        CPU.ioUnit.write(CPU.tapeMemory.currentValue)
-    }
-
-    private fun memOutCuIn() {
-        CPU.counterUnit.currentValue = CPU.tapeMemory.currentValue
-    }
-
-    private fun CuOutMemIn() {
-        CPU.tapeMemory.currentValue = CPU.counterUnit.currentValue
+        ControlLines.tapeMemoryOut = true
+        ControlLines.ioUnitIn = true
+        CPU.tick()
     }
 }

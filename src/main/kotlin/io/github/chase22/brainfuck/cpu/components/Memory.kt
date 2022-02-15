@@ -1,5 +1,6 @@
 package io.github.chase22.brainfuck.cpu.components
 
+import io.github.chase22.brainfuck.cpu.CPU
 import io.github.chase22.brainfuck.cpu.InstructionSet
 import io.github.chase22.brainfuck.cpu.base.ByteInt
 import io.github.chase22.brainfuck.cpu.base.Counter
@@ -42,4 +43,13 @@ open class Memory(private val memoryCounter: Counter) {
 class ProgramMemory(memoryCounter: Counter) : Memory(memoryCounter) {
     val currentInstruction: InstructionSet
         get() = InstructionSet.values[currentValue.value]
+}
+
+class TapeMemory(memoryCounter: Counter) : Memory(memoryCounter), ClockReceiver {
+    override fun onClockTick(cycleCount: UInt) {
+        if (ControlLines.tapeMemoryIn) {
+            currentValue = CPU.databus.currentValue
+        }
+    }
+
 }
