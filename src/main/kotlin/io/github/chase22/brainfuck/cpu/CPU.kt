@@ -6,9 +6,6 @@ import io.github.chase22.brainfuck.cpu.base.TapeMemoryCounter
 import io.github.chase22.brainfuck.cpu.components.*
 import java.io.InputStream
 import java.io.OutputStream
-import kotlin.reflect.full.createType
-import kotlin.reflect.full.isSubtypeOf
-import kotlin.reflect.full.memberProperties
 
 object CPU {
     val tapeMemoryCounter = TapeMemoryCounter()
@@ -31,13 +28,7 @@ object CPU {
 
     var cycleCount = 0.toUInt()
 
-    private val clockReceivers: List<ClockReceiver> by lazy {
-        CPU::class.memberProperties
-            .filter { it.returnType.isSubtypeOf(ClockReceiver::class.createType()) }
-            .map {
-                it.get(CPU) as ClockReceiver
-            }
-    }
+    private val clockReceivers = listOf(counterUnit, ioUnit, loopCounter, programCounter, tapeMemory, tapeMemoryCounter)
 
     fun run() {
         controlLogic.run()
