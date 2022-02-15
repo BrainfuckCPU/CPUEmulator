@@ -4,6 +4,8 @@ import io.github.chase22.brainfuck.cpu.base.LoopCounter
 import io.github.chase22.brainfuck.cpu.base.ProgramCounter
 import io.github.chase22.brainfuck.cpu.base.TapeMemoryCounter
 import io.github.chase22.brainfuck.cpu.components.*
+import java.io.InputStream
+import java.io.OutputStream
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
@@ -24,6 +26,8 @@ object CPU {
     private val controlLogic = ControlLogic()
 
     var debugOutput: Boolean = false
+    var outputStream: OutputStream = System.out
+    var inputStream: InputStream = System.`in`
 
     var cycleCount = 0.toUInt()
 
