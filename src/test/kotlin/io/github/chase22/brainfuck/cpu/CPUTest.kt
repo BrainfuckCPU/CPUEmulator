@@ -18,11 +18,23 @@ class CPUTest {
     }
 
     @Test
+    fun testIncrement() {
+        CPU.loadProgram("++.")
+        CPU.run()
+        assertEquals(2, testOutputStream.take())
+    }
+
+    @Test
+    fun testDecrement() {
+        CPU.loadProgram("--.")
+        CPU.run()
+        assertEquals(254, testOutputStream.take())
+    }
+
+    @Test
     fun testSimpleLoops() {
-        CPU.debugOutput = true
         CPU.loadProgram("++[>+<-]>.")
         CPU.run()
-        CPU.tapeMemory.print()
         assertEquals(2, testOutputStream.take())
     }
 
@@ -30,7 +42,7 @@ class CPUTest {
     fun testNestedLoops() {
         CPU.loadProgram("++[>++++[>+<-]<-]>>.")
         CPU.run()
-        CPU.tapeMemory.print()
+        assertEquals(8, testOutputStream.take())
     }
 
     @Test
