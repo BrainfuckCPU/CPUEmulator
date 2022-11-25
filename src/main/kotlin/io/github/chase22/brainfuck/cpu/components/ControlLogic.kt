@@ -1,9 +1,10 @@
 package io.github.chase22.brainfuck.cpu.components
 
 import io.github.chase22.brainfuck.cpu.CPU
+import io.github.chase22.brainfuck.cpu.FlagRegister
 import io.github.chase22.brainfuck.cpu.InstructionSet.*
 
-class ControlLogic {
+class ControlLogic(private val flagRegister: FlagRegister) {
     fun run() {
         while (true) {
             val memoryBefore = "${CPU.tapeMemoryCounter.currentValue} : ${CPU.tapeMemory.currentValue}"
@@ -26,13 +27,13 @@ class ControlLogic {
     }
 
     private fun loopStart() {
-        if (CPU.tapeMemory.currentValue.value == 0) {
+        if (flagRegister.currentZero) {
             loopCounterUp()
-            while (CPU.loopCounter.isInLoop) {
+            while (flagRegister.isInLoop) {
                 programCounterUp()
-                if (CPU.programMemory.currentInstruction == LOOP_START) {
+                if (flagRegister.isCurrentLoopStart) {
                     loopCounterUp()
-                } else if (CPU.programMemory.currentInstruction == LOOP_END) {
+                } else if (flagRegister.isCurrentLoopEnd) {
                     loopCounterDown()
                 }
             }
@@ -40,13 +41,13 @@ class ControlLogic {
     }
 
     private fun loopEnd() {
-        if (CPU.tapeMemory.currentValue.value != 0) {
+        if (!flagRegister.currentZero) {
             loopCounterUp()
-            while (CPU.loopCounter.isInLoop) {
+            while (flagRegister.isInLoop) {
                 programCounterDown()
-                if (CPU.programMemory.currentInstruction == LOOP_START) {
+                if (flagRegister.isCurrentLoopStart) {
                     loopCounterDown()
-                } else if (CPU.programMemory.currentInstruction == LOOP_END) {
+                } else if (flagRegister.isCurrentLoopEnd) {
                     loopCounterUp()
                 }
             }

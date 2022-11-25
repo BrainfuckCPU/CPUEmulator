@@ -3,7 +3,13 @@ package io.github.chase22.brainfuck.cpu
 import io.github.chase22.brainfuck.cpu.base.LoopCounter
 import io.github.chase22.brainfuck.cpu.base.ProgramCounter
 import io.github.chase22.brainfuck.cpu.base.TapeMemoryCounter
-import io.github.chase22.brainfuck.cpu.components.*
+import io.github.chase22.brainfuck.cpu.components.ControlLines
+import io.github.chase22.brainfuck.cpu.components.ControlLogic
+import io.github.chase22.brainfuck.cpu.components.CounterUnit
+import io.github.chase22.brainfuck.cpu.components.Databus
+import io.github.chase22.brainfuck.cpu.components.IOUnit
+import io.github.chase22.brainfuck.cpu.components.ProgramMemory
+import io.github.chase22.brainfuck.cpu.components.TapeMemory
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -20,7 +26,9 @@ object CPU {
 
     val databus = Databus(tapeMemory, counterUnit, ioUnit)
 
-    private val controlLogic = ControlLogic()
+    private val flagRegister = FlagRegister()
+
+    private val controlLogic = ControlLogic(flagRegister)
 
     var debugOutput: Boolean = false
     var outputStream: OutputStream = System.out
