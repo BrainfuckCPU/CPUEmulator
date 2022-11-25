@@ -5,6 +5,30 @@ import io.github.chase22.brainfuck.cpu.FlagRegister
 import io.github.chase22.brainfuck.cpu.InstructionSet.*
 
 class ControlLogic(private val flagRegister: FlagRegister) {
+
+    fun tick() {
+        setupControlLines()
+        CPU.tick()
+    }
+
+    fun setupControlLines() {
+        val memoryBefore = "${CPU.tapeMemoryCounter.currentValue} : ${CPU.tapeMemory.currentValue}"
+        when (CPU.programMemory.currentInstruction) {
+            PLUS -> increment()
+            MINUS -> decrement()
+            NEXT -> shiftRight()
+            PREVIOUS -> shiftLeft()
+            OUTPUT -> output()
+            INPUT -> input()
+            LOOP_START -> loopStart()
+            LOOP_END -> loopEnd()
+            else -> return
+        }
+        if (CPU.debugOutput) {
+            println("${CPU.programCounter.currentValue}: ${CPU.programMemory.currentInstruction.command} - $memoryBefore -> ${CPU.tapeMemoryCounter.currentValue} : ${CPU.tapeMemory.currentValue}")
+        }
+    }
+
     fun run() {
         while (true) {
             val memoryBefore = "${CPU.tapeMemoryCounter.currentValue} : ${CPU.tapeMemory.currentValue}"
@@ -22,7 +46,6 @@ class ControlLogic(private val flagRegister: FlagRegister) {
             if (CPU.debugOutput) {
                 println("${CPU.programCounter.currentValue}: ${CPU.programMemory.currentInstruction.command} - $memoryBefore -> ${CPU.tapeMemoryCounter.currentValue} : ${CPU.tapeMemory.currentValue}")
             }
-            programCounterUp()
         }
     }
 
@@ -54,11 +77,18 @@ class ControlLogic(private val flagRegister: FlagRegister) {
         }
     }
 
-    fun increment() {
-        tapeMemoryToCounterUnit()
-        counterUnitUp()
-        counterUnitToTapeMemory()
+    fun programCounterEnable() {
+        ControlLines.programCounterUp = true
+        ControlLines.microstepCounterReset = true
+    }
 
+    fun increment() {
+        when (CPU.microstepCounter.currentValue.value) {
+            0 -> tapeMemoryToCounterUnit()
+            1 -> counterUnitUp()
+            2 -> counterUnitToTapeMemory()
+            3 -> programCounterEnable()
+        }
     }
 
     fun decrement() {
@@ -84,21 +114,25 @@ class ControlLogic(private val flagRegister: FlagRegister) {
     }
 
     private fun output() {
+        when (CPU.microstepCounter.currentValue.value) {
+            0 -> tapeMemoryToIoUnit()
+            1 -> programCounterEnable()
+        }
+    }
+
+    private fun tapeMemoryToIoUnit() {
         ControlLines.tapeMemoryOut = true
         ControlLines.ioUnitIn = true
-        CPU.tick()
     }
 
     private fun tapeMemoryToCounterUnit() {
         ControlLines.tapeMemoryOut = true
         ControlLines.counterUnitIn = true
-        CPU.tick()
     }
 
     private fun counterUnitToTapeMemory() {
         ControlLines.counterUnitOut = true
         ControlLines.tapeMemoryIn = true
-        CPU.tick()
     }
 
     private fun programCounterDown() {
@@ -123,7 +157,6 @@ class ControlLogic(private val flagRegister: FlagRegister) {
 
     private fun counterUnitUp() {
         ControlLines.counterUnitUp = true
-        CPU.tick()
     }
 
     private fun counterUnitDown() {

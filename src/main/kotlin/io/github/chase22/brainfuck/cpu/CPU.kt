@@ -1,6 +1,7 @@
 package io.github.chase22.brainfuck.cpu
 
 import io.github.chase22.brainfuck.cpu.base.LoopCounter
+import io.github.chase22.brainfuck.cpu.base.MicrostepCounter
 import io.github.chase22.brainfuck.cpu.base.ProgramCounter
 import io.github.chase22.brainfuck.cpu.base.TapeMemoryCounter
 import io.github.chase22.brainfuck.cpu.components.ControlLines
@@ -16,8 +17,9 @@ import java.io.OutputStream
 object CPU {
     val tapeMemoryCounter = TapeMemoryCounter()
     val programCounter = ProgramCounter()
-    val loopCounter = LoopCounter()
+    val microstepCounter = MicrostepCounter()
 
+    val loopCounter = LoopCounter()
     val tapeMemory = TapeMemory(tapeMemoryCounter)
     val programMemory = ProgramMemory(programCounter)
 
@@ -36,7 +38,8 @@ object CPU {
 
     var cycleCount = 0.toUInt()
 
-    private val clockReceivers = listOf(counterUnit, ioUnit, loopCounter, programCounter, tapeMemory, tapeMemoryCounter)
+    private val clockReceivers =
+        listOf(counterUnit, ioUnit, loopCounter, programCounter, microstepCounter, tapeMemory, tapeMemoryCounter)
 
     fun run() {
         controlLogic.run()

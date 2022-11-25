@@ -9,6 +9,9 @@ object ControlLines {
     var programCounterUp: Boolean = false
     var programCounterDown: Boolean = false
 
+    var microstepCounterHold: Boolean = false
+    var microstepCounterReset: Boolean = false
+
     var tapeMemoryCounterUp: Boolean = false
     var tapeMemoryCounterDown: Boolean = false
 
@@ -30,6 +33,8 @@ object ControlLines {
         tapeMemoryOut = false
         programCounterUp = false
         programCounterDown = false
+        microstepCounterHold = false
+        microstepCounterReset = false
         tapeMemoryCounterUp = false
         tapeMemoryCounterDown = false
         ioUnitIn = false

@@ -19,6 +19,7 @@ class CPUTest {
 
     @Test
     fun testIncrement() {
+        CPU.debugOutput = true
         CPU.loadProgram("++.")
         CPU.run()
         assertEquals(2, testOutputStream.take())

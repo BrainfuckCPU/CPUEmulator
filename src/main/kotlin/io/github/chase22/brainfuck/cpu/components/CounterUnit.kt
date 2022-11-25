@@ -14,8 +14,10 @@ class CounterUnit : ClockReceiver {
     }
 
     override fun onClockTick(cycleCount: UInt) {
-        if (ControlLines.counterUnitIn) currentValue = CPU.databus.currentValue
-        if (ControlLines.counterUnitUp) increment()
-        if (ControlLines.counterUnitDown) decrement()
+        when {
+            ControlLines.counterUnitIn -> currentValue = CPU.databus.currentValue
+            ControlLines.counterUnitUp -> increment()
+            ControlLines.counterUnitDown -> decrement()
+        }
     }
 }
