@@ -14,7 +14,7 @@ import java.io.InputStream
 import java.io.OutputStream
 
 object CPU {
-    private val controlLines = ControlLines()
+    val controlLines = ControlLines()
 
     val tapeMemoryCounter = TapeMemoryCounter(controlLines)
     val programCounter = ProgramCounter(controlLines)
@@ -29,7 +29,7 @@ object CPU {
 
     val databus = Databus(tapeMemory, counterUnit, ioUnit, controlLines)
 
-    private val flagRegister = FlagRegister()
+    val flagRegister = FlagRegister()
 
     var debugOutput: Boolean = false
     var outputStream: OutputStream = System.out

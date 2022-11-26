@@ -1,4 +1,4 @@
-package io.github.chase22.brainfuck.cpu;
+package io.github.chase22.brainfuck.cpu
 
 import io.github.chase22.brainfuck.cpu.base.ByteInt
 
