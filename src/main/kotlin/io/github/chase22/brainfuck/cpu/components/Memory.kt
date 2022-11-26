@@ -45,9 +45,12 @@ class ProgramMemory(memoryCounter: Counter) : Memory(memoryCounter) {
         get() = InstructionSet.values[currentValue.value]
 }
 
-class TapeMemory(memoryCounter: Counter) : Memory(memoryCounter), ClockReceiver {
+class TapeMemory(
+    private val controlLines: ControlLines,
+    memoryCounter: Counter
+) : Memory(memoryCounter), ClockReceiver {
     override fun onClockTick(cycleCount: UInt) {
-        if (ControlLines.tapeMemoryIn) {
+        if (controlLines.tapeMemoryIn) {
             currentValue = CPU.databus.currentValue
         }
     }

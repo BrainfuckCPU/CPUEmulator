@@ -3,7 +3,7 @@ package io.github.chase22.brainfuck.cpu.components
 import io.github.chase22.brainfuck.cpu.CPU
 import io.github.chase22.brainfuck.cpu.base.ByteInt
 
-class CounterUnit : ClockReceiver {
+class CounterUnit(private val controlLines: ControlLines) : ClockReceiver {
     var currentValue = ByteInt(0)
 
     fun increment() = currentValue++
@@ -15,9 +15,9 @@ class CounterUnit : ClockReceiver {
 
     override fun onClockTick(cycleCount: UInt) {
         when {
-            ControlLines.counterUnitIn -> currentValue = CPU.databus.currentValue
-            ControlLines.counterUnitUp -> increment()
-            ControlLines.counterUnitDown -> decrement()
+            controlLines.counterUnitIn -> currentValue = CPU.databus.currentValue
+            controlLines.counterUnitUp -> increment()
+            controlLines.counterUnitDown -> decrement()
         }
     }
 }

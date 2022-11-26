@@ -18,31 +18,33 @@ open class Counter(
     }
 
     override fun onClockTick(cycleCount: UInt) {
-        if (resetLine()) reset()
-        if (countUpLine()) countUp()
-        if (countDownLine()) countDown()
+        when {
+            resetLine() -> reset()
+            countUpLine() -> countUp()
+            countDownLine() -> countDown()
+        }
     }
 }
 
-class ProgramCounter : Counter(
-    ControlLines::programCounterUp,
-    ControlLines::programCounterDown
+class ProgramCounter(controlLines: ControlLines) : Counter(
+    controlLines::programCounterUp,
+    controlLines::programCounterDown
 )
 
-class MicrostepCounter : Counter(
-    { !ControlLines.microstepCounterHold },
+class MicrostepCounter(controlLines: ControlLines) : Counter(
+    { !controlLines.microstepCounterHold },
     { false },
-    ControlLines::microstepCounterReset
+    controlLines::microstepCounterReset
 )
 
-class TapeMemoryCounter : Counter(
-    ControlLines::tapeMemoryCounterUp,
-    ControlLines::tapeMemoryCounterDown
+class TapeMemoryCounter(controlLines: ControlLines) : Counter(
+    controlLines::tapeMemoryCounterUp,
+    controlLines::tapeMemoryCounterDown
 )
 
-class LoopCounter : Counter(
-    ControlLines::loopCounterUp,
-    ControlLines::loopCounterDown
+class LoopCounter(controlLines: ControlLines) : Counter(
+    controlLines::loopCounterUp,
+    controlLines::loopCounterDown
 ) {
     val isInLoop
         get() = currentValue != ByteInt(0)
