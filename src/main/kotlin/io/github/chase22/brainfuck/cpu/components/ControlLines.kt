@@ -28,24 +28,7 @@ data class ControlLines(
     var reset: Boolean = false,
 ) {
     fun reset() {
-        counterUnitUp = false
-        counterUnitDown = false
-        counterUnitIn = false
-        counterUnitOut = false
-        tapeMemoryIn = false
-        tapeMemoryOut = false
-        programCounterUp = false
-        programCounterDown = false
-        microstepCounterHold = false
-        microstepCounterReset = false
-        tapeMemoryCounterUp = false
-        tapeMemoryCounterDown = false
-        ioUnitIn = false
-        ioUnitOut = false
-        loopCounterUp = false
-        loopCounterDown = false
-        halt = false
-        reset = false
+        apply(ControlLines())
     }
 
     fun apply(other: ControlLines) {
