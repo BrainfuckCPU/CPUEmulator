@@ -41,19 +41,21 @@ object CPU {
         listOf(counterUnit, ioUnit, loopCounter, programCounter, microstepCounter, tapeMemory, tapeMemoryCounter)
 
     fun run() {
-        while (true) {
-            println("${programMemory.currentInstruction.ordinal}, ${microstepCounter.currentValue.value}")
-            controlLines.apply(instructionMemory[programMemory.currentInstruction.ordinal, microstepCounter.currentValue.value])
-            println(controlLines)
-            if (controlLines.halt) return
-            tick()
+        while (!controlLines.halt) {
+            step()
         }
+    }
+
+    fun step() {
+        if (controlLines.halt) return
+        controlLines.reset()
+        controlLines.apply(instructionMemory[programMemory.currentInstruction.ordinal, microstepCounter.currentValue.value])
+        tick()
     }
 
     fun tick() {
         clockReceivers.forEach { it.onClockTick(cycleCount) }
         cycleCount++
-        controlLines.reset()
     }
 
     fun loadProgram(program: String) {
@@ -64,8 +66,10 @@ object CPU {
     fun reset() {
         tapeMemoryCounter.reset()
         programCounter.reset()
+        microstepCounter.reset()
         tapeMemory.reset()
         counterUnit.reset()
+        controlLines.reset()
         cycleCount = 0.toUInt()
     }
 }

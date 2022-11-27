@@ -17,6 +17,7 @@ class ByteInt(value: Int) : Number() {
         this.value++
         return this
     }
+
     operator fun dec(): ByteInt {
         this.value--
         return this
@@ -24,7 +25,8 @@ class ByteInt(value: Int) : Number() {
 
     operator fun unaryPlus() = this.value
 
-    override fun toString() = value.toString()
+    override fun toString() = toString(10)
+    fun toString(radix: Int = 10) = value.toString(radix)
 
     override fun hashCode(): Int = value.hashCode()
 
