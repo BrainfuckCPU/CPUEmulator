@@ -5,10 +5,10 @@ class FlagRegister {
         get() = CPU.loopCounter.isInLoop
 
     val isCurrentLoopStart: Boolean
-        get() = CPU.programMemory.currentInstruction == InstructionSet.LOOP_START
+        get() = CPU.programMemory.currentInstruction == Command.LOOP_START
 
     val isCurrentLoopEnd: Boolean
-        get() = CPU.programMemory.currentInstruction == InstructionSet.LOOP_END
+        get() = CPU.programMemory.currentInstruction == Command.LOOP_END
 
     val currentZero: Boolean
         get() = CPU.tapeMemory.currentValue.value == 0

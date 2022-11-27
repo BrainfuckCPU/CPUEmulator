@@ -1,6 +1,6 @@
 package io.github.chase22.brainfuck.cpu
 
-enum class InstructionSet(val command: String) {
+enum class Command(val command: String) {
     STOP("stop"),
     RESET("reset"),
     PLUS("+"),
@@ -14,12 +14,12 @@ enum class InstructionSet(val command: String) {
     HALT_ON_ZERO("|");
 
     companion object {
-        val values: Array<InstructionSet> by lazy { values() }
+        val values: Array<Command> by lazy { values() }
 
-        fun fromCommand(command: String): InstructionSet = values
+        fun fromCommand(command: String): Command = values
             .find { it.command == command } ?: throw IllegalArgumentException("No Instruction for Command $command")
 
-        fun fromOrdinal(ordinal: Int): InstructionSet =
+        fun fromOrdinal(ordinal: Int): Command =
             values.find { it.ordinal == ordinal } ?: throw IndexOutOfBoundsException(ordinal)
     }
 

@@ -14,7 +14,7 @@ class MainFrame : JFrame("CPU"), Updatable {
     private val lights = LightsPanel(CPU.controlLines, CPU.flagRegister)
     private val tapeTable = MemoryTable("Tape Memory", CPU.tapeMemory, CPU.tapeMemoryCounter, null)
     private val programTable =
-        MemoryTable("Program Memory", CPU.programMemory, CPU.programCounter) { InstructionSet.fromOrdinal(it).command }
+        MemoryTable("Program Memory", CPU.programMemory, CPU.programCounter) { Command.fromOrdinal(it).command }
 
     private val registers = Registers()
 

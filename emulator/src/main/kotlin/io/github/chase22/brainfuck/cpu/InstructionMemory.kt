@@ -1,6 +1,6 @@
 package io.github.chase22.brainfuck.cpu
 
-import io.github.chase22.brainfuck.cpu.InstructionSet.*
+import io.github.chase22.brainfuck.cpu.Command.*
 import io.github.chase22.brainfuck.cpu.components.ControlLines
 
 val instructionMemory = InstructionMemoryBuilder {
@@ -80,55 +80,75 @@ val instructionMemory = InstructionMemoryBuilder {
         nextInstructionMicrostep(1)
     }
 
-    instruction(HALT_ON_ZERO) {
-        conditional { it.currentZero }
-        microStep(0) {
-            halt()
+    multiInstruction(HALT_ON_ZERO) {
+        conditional({ it.currentZero }) {
+            microStep(0) { halt() }
         }
-    }
-    instruction(HALT_ON_ZERO) {
-        nextInstructionMicrostep(0)
+        always {
+            nextInstructionMicrostep(0)
+        }
     }
 }.build()
 
 class InstructionMemory(val instructions: Map<Int, List<Instruction>>) {
     operator fun get(instruction: Int, microstep: Int): ControlLines {
-        return instructions[instruction]?.find { it.conditional(CPU.flagRegister) }?.microsteps?.get(microstep)
+        return instructions[instruction]?.find { it.condition(CPU.flagRegister) }?.microsteps?.get(microstep)
             ?: throw IllegalArgumentException("Unknown instruction $instruction $microstep")
     }
 }
 
 class Instruction(
-    val instruction: Int,
+    val command: Command,
     val microsteps: Map<Int, ControlLines>,
-    val conditional: (FlagRegister) -> Boolean
+    val condition: InstructionCondition
 )
 
 class InstructionMemoryBuilder(private val setup: InstructionMemoryBuilder.() -> Unit) {
-    private val instructions = mutableMapOf<InstructionSet, List<Instruction>>()
+    private val instructions = mutableMapOf<Command, List<Instruction>>()
 
-    fun instruction(instruction: InstructionSet, setup: InstructionBuilder.() -> Unit) {
-        val buildInstruction = InstructionBuilder(instruction.ordinal).apply(setup).build()
+    fun instruction(instruction: Command, setup: InstructionBuilder.() -> Unit) {
+        val buildInstruction = InstructionBuilder(instruction).apply(setup).build()
 
-        instructions.merge(instruction, listOf(buildInstruction)) { old, new -> old + new }
+        addInstructions(listOf(buildInstruction))
+    }
+
+    fun multiInstruction(command: Command, setup: MultiInstructionBuilder.() -> Unit) {
+        addInstructions(MultiInstructionBuilder(command).apply(setup).build())
+    }
+
+    private fun addInstructions(instructions: List<Instruction>) {
+        this.instructions.merge(instructions.first().command, instructions) { old, new -> old + new }
     }
 
     fun build() = InstructionMemory(apply(setup).instructions.mapKeys { it.key.ordinal }.toMap())
 }
 
-class InstructionBuilder(private val instruction: Int) {
-    private val microsteps = mutableMapOf<Int, ControlLines>()
-    private var conditional: (FlagRegister) -> Boolean = { true }
+class MultiInstructionBuilder(private val command: Command) {
+    private val subInstructions = mutableListOf<Instruction>()
 
-    fun build(): Instruction = Instruction(instruction, microsteps, conditional)
-
-    fun conditional(conditional: (FlagRegister) -> Boolean) {
-        this.conditional = conditional
+    fun always(setup: InstructionBuilder.() -> Unit) {
+        if (subInstructions.any { it.condition == InstructionBuilder.ALWAYS_TRUE_CONDITION }) {
+            throw IllegalStateException("Multiple Always true conditions in ${command.command}")
+        }
+        subInstructions.add(InstructionBuilder(command).apply(setup).build())
     }
+
+    fun conditional(condition: InstructionCondition, setup: InstructionBuilder.() -> Unit) {
+        subInstructions.add(InstructionBuilder(command).apply(setup).build(condition))
+    }
+
+    fun build(): List<Instruction> = subInstructions.toList()
+}
+
+class InstructionBuilder(private val command: Command) {
+    private val microsteps = mutableMapOf<Int, ControlLines>()
+
+    fun build(condition: InstructionCondition = ALWAYS_TRUE_CONDITION): Instruction =
+        Instruction(command, microsteps, condition)
 
     fun microStep(microstep: Int, setup: ControlLinesBuilder.() -> Unit) {
         if (microsteps.putIfAbsent(microstep, ControlLinesBuilder().apply(setup).build()) != null) {
-            throw IllegalArgumentException("Duplicate microstep $microstep for instruction $instruction")
+            throw IllegalArgumentException("Duplicate microstep $microstep for command $command")
         }
     }
 
@@ -136,7 +156,13 @@ class InstructionBuilder(private val instruction: Int) {
         programCounterUp()
         microstepCounterReset()
     }
+
+    companion object {
+        val ALWAYS_TRUE_CONDITION: InstructionCondition = { true }
+    }
 }
+
+typealias InstructionCondition = (FlagRegister) -> Boolean
 
 class ControlLinesBuilder {
     private val controlLines: ControlLines = ControlLines()
