@@ -42,15 +42,15 @@ object CPU {
 
     fun run() {
         while (!controlLines.halt) {
-            step()
+            setup()
+            tick()
         }
     }
 
-    fun step() {
+    fun setup() {
         if (controlLines.halt) return
         controlLines.reset()
         controlLines.apply(instructionMemory[programMemory.currentInstruction.ordinal, microstepCounter.currentValue.value])
-        tick()
     }
 
     fun tick() {

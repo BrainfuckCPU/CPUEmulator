@@ -5,7 +5,6 @@ import java.awt.FlowLayout
 import java.awt.LayoutManager
 import javax.swing.JFrame
 import javax.swing.JPanel
-import javax.swing.JScrollPane
 
 fun main() {
     MainFrame()
@@ -13,28 +12,34 @@ fun main() {
 
 class MainFrame : JFrame("CPU"), Updatable {
     private val lights = LightsPanel(CPU.controlLines, CPU.flagRegister)
-    private val tapeTable = MemoryTable(CPU.tapeMemory, CPU.tapeMemoryCounter)
-    private val programTable = MemoryTable(CPU.programMemory, CPU.programCounter)
+    private val tapeTable = MemoryTable("Tape Memory", CPU.tapeMemory, CPU.tapeMemoryCounter, null)
+    private val programTable =
+        MemoryTable("Program Memory", CPU.programMemory, CPU.programCounter) { InstructionSet.fromOrdinal(it).command }
 
     private val registers = Registers()
+
     init {
         defaultCloseOperation = EXIT_ON_CLOSE
         isVisible = true
         layout = BorderLayout()
 
-        CPU.loadProgram("++.")
+        CPU.loadProgram("++|--|.")
+        CPU.setup()
 
         add(lights, BorderLayout.CENTER)
-        add(JScrollPane(tapeTable), BorderLayout.WEST)
-        add(JScrollPane(programTable), BorderLayout.EAST)
+        add(tapeTable, BorderLayout.WEST)
+        add(programTable, BorderLayout.EAST)
         add(BottomPanel({
-            CPU.step()
+            CPU.tick()
+            CPU.setup()
             update()
         }) { CPU.reset(); update() }, BorderLayout.SOUTH)
 
         add(registers, BorderLayout.NORTH)
 
-        extendedState = MAXIMIZED_BOTH;
+        extendedState = MAXIMIZED_BOTH
+
+        update()
     }
 
     override fun update() {

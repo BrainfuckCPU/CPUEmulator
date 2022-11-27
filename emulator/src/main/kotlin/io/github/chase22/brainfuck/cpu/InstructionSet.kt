@@ -10,13 +10,17 @@ enum class InstructionSet(val command: String) {
     OUTPUT("."),
     INPUT(","),
     LOOP_START("["),
-    LOOP_END("]");
+    LOOP_END("]"),
+    HALT_ON_ZERO("|");
 
     companion object {
         val values: Array<InstructionSet> by lazy { values() }
 
         fun fromCommand(command: String): InstructionSet = values
             .find { it.command == command } ?: throw IllegalArgumentException("No Instruction for Command $command")
+
+        fun fromOrdinal(ordinal: Int): InstructionSet =
+            values.find { it.ordinal == ordinal } ?: throw IndexOutOfBoundsException(ordinal)
     }
 
     override fun toString(): String {

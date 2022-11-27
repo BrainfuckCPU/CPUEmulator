@@ -79,34 +79,52 @@ val instructionMemory = InstructionMemoryBuilder {
         }
         nextInstructionMicrostep(1)
     }
+
+    instruction(HALT_ON_ZERO) {
+        conditional { it.currentZero }
+        microStep(0) {
+            halt()
+        }
+    }
+    instruction(HALT_ON_ZERO) {
+        nextInstructionMicrostep(0)
+    }
 }.build()
 
-class InstructionMemory(val instructions: Map<Int, Instruction>) {
+class InstructionMemory(val instructions: Map<Int, List<Instruction>>) {
     operator fun get(instruction: Int, microstep: Int): ControlLines {
-        return instructions[instruction]?.microsteps?.get(microstep)
+        return instructions[instruction]?.find { it.conditional(CPU.flagRegister) }?.microsteps?.get(microstep)
             ?: throw IllegalArgumentException("Unknown instruction $instruction $microstep")
     }
 }
 
 class Instruction(
     val instruction: Int,
-    val microsteps: Map<Int, ControlLines>
+    val microsteps: Map<Int, ControlLines>,
+    val conditional: (FlagRegister) -> Boolean
 )
 
 class InstructionMemoryBuilder(private val setup: InstructionMemoryBuilder.() -> Unit) {
-    private val instructions = mutableListOf<Instruction>()
+    private val instructions = mutableMapOf<InstructionSet, List<Instruction>>()
 
     fun instruction(instruction: InstructionSet, setup: InstructionBuilder.() -> Unit) {
-        instructions.add(InstructionBuilder(instruction.ordinal).apply(setup).build())
+        val buildInstruction = InstructionBuilder(instruction.ordinal).apply(setup).build()
+
+        instructions.merge(instruction, listOf(buildInstruction)) { old, new -> old + new }
     }
 
-    fun build() = InstructionMemory(apply(setup).instructions.associateBy { it.instruction })
+    fun build() = InstructionMemory(apply(setup).instructions.mapKeys { it.key.ordinal }.toMap())
 }
 
 class InstructionBuilder(private val instruction: Int) {
     private val microsteps = mutableMapOf<Int, ControlLines>()
+    private var conditional: (FlagRegister) -> Boolean = { true }
 
-    fun build(): Instruction = Instruction(instruction, microsteps)
+    fun build(): Instruction = Instruction(instruction, microsteps, conditional)
+
+    fun conditional(conditional: (FlagRegister) -> Boolean) {
+        this.conditional = conditional
+    }
 
     fun microStep(microstep: Int, setup: ControlLinesBuilder.() -> Unit) {
         if (microsteps.putIfAbsent(microstep, ControlLinesBuilder().apply(setup).build()) != null) {

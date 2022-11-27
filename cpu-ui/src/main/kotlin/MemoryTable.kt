@@ -2,31 +2,48 @@ package io.github.chase22.brainfuck.cpu
 
 import io.github.chase22.brainfuck.cpu.base.Counter
 import io.github.chase22.brainfuck.cpu.components.Memory
+import java.awt.BorderLayout
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JScrollPane
 import javax.swing.JTable
 import javax.swing.event.TableModelListener
-import javax.swing.table.JTableHeader
 import javax.swing.table.TableModel
 
-class MemoryTable(private val source: Memory, private val memoryCounter: Counter) : JTable(), Updatable {
+typealias Decoder = (Int) -> String
+
+class MemoryTable(
+    label: String,
+    private val source: Memory,
+    private val memoryCounter: Counter,
+    val decoder: Decoder?
+) :
+    JPanel(BorderLayout()), Updatable {
+    private val table = JTable()
+    private val scrollPane = JScrollPane(table)
+
     init {
-        tableHeader = JTableHeader()
+        add(JLabel(label), BorderLayout.NORTH)
+        add(scrollPane, BorderLayout.CENTER)
         update()
     }
 
     override fun update() {
-        model = MemoryTableModel(source, memoryCounter)
+        table.model = MemoryTableModel(source, memoryCounter, decoder)
     }
 }
 
-class MemoryTableModel(private val source: Memory, private val memoryCounter: Counter) : TableModel {
+class MemoryTableModel(private val source: Memory, private val memoryCounter: Counter, val decoder: Decoder? = null) :
+    TableModel {
     override fun getRowCount(): Int = source.memory.size
 
-    override fun getColumnCount(): Int = 3
+    override fun getColumnCount(): Int = if (decoder != null) 4 else 3
 
     override fun getColumnName(columnIndex: Int): String = when (columnIndex) {
         0 -> "Active"
         1 -> "Index"
         2 -> "Value"
+        3 -> "Decoded"
         else -> "Unknown Column"
     }
 
@@ -39,6 +56,7 @@ class MemoryTableModel(private val source: Memory, private val memoryCounter: Co
             0 -> if (memoryCounter.currentValue.value == rowIndex) ">" else ""
             1 -> rowIndex
             2 -> source.memory[rowIndex].value
+            3 -> decoder?.invoke(source.memory[rowIndex].value)
             else -> null
         }
 
