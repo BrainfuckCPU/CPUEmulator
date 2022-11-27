@@ -29,16 +29,12 @@ class RegisterPane(private val value: () -> ByteInt, label: String) : JPanel(), 
     }
 }
 
-class Registers : JPanel(FlowLayout(FlowLayout.CENTER, 10, 10)), Updatable {
+class Registers : UpdatableJPPanel(FlowLayout(FlowLayout.CENTER, 10, 10)) {
     init {
         add(RegisterPane(CPU.programCounter::currentValue, "Program Counter"))
         add(RegisterPane(CPU.microstepCounter::currentValue, "Microstep Counter"))
         add(RegisterPane(CPU.tapeMemoryCounter::currentValue, "Tape Memory Counter"))
         add(RegisterPane(CPU.loopCounter::currentValue, "Loop Counter"))
         add(RegisterPane(CPU.counterUnit::currentValue, "Counter Unit"))
-    }
-
-    override fun update() {
-        this.components.filterIsInstance<Updatable>().forEach(Updatable::update)
     }
 }
