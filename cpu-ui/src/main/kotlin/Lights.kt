@@ -40,11 +40,11 @@ class ControlLineLights(private val controlLines: ControlLines) :
 class FlagRegisterLights(private val flagRegister: FlagRegister) : Lights(
     listOf(
         "isInLoop" to flagRegister::isInLoop,
+        "loopForward" to flagRegister::loopForward,
         "currentZero" to flagRegister::currentZero,
         "isCurrentLoopStart" to flagRegister::isCurrentLoopStart,
         "isCurrentLoopEnd" to flagRegister::isCurrentLoopEnd,
-
-        )
+    )
 )
 
 open class Lights(

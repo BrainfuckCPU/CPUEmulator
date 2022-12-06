@@ -20,56 +20,114 @@ val instructionMemory = InstructionMemoryBuilder {
         }
     }
 
-    instruction(PLUS) {
-        microStep(0) {
-            tapeMemoryOut()
-            counterUnitIn()
+
+    multiInstruction(PLUS) {
+        conditional({ it.isInLoop && it.loopForward }) {
+            nextInstructionMicrostep(0)
         }
-        microStep(1) {
-            counterUnitUp()
+        conditional({ it.isInLoop && !it.loopForward }) {
+            microStep(0) {
+                programCounterDown()
+                microstepCounterReset()
+            }
         }
-        microStep(2) {
-            counterUnitOut()
-            tapeMemoryIn()
+        always {
+            microStep(0) {
+                tapeMemoryOut()
+                counterUnitIn()
+            }
+            microStep(1) {
+                counterUnitUp()
+            }
+            microStep(2) {
+                counterUnitOut()
+                tapeMemoryIn()
+            }
+            nextInstructionMicrostep(3)
         }
-        nextInstructionMicrostep(3)
     }
 
-    instruction(MINUS) {
-        microStep(0) {
-            tapeMemoryOut()
-            counterUnitIn()
+    multiInstruction(MINUS) {
+        conditional({ it.isInLoop && it.loopForward }) {
+            nextInstructionMicrostep(0)
         }
-        microStep(1) {
-            counterUnitDown()
+        conditional({ it.isInLoop && !it.loopForward }) {
+            microStep(0) {
+                programCounterDown()
+                microstepCounterReset()
+            }
         }
-        microStep(2) {
-            counterUnitOut()
-            tapeMemoryIn()
+        always {
+            microStep(0) {
+                tapeMemoryOut()
+                counterUnitIn()
+            }
+            microStep(1) {
+                counterUnitDown()
+            }
+            microStep(2) {
+                counterUnitOut()
+                tapeMemoryIn()
+            }
+            nextInstructionMicrostep(3)
         }
-        nextInstructionMicrostep(3)
     }
 
-    instruction(NEXT) {
-        microStep(0) {
-            tapeMemoryCounterUp()
+    multiInstruction(NEXT) {
+        conditional({ it.isInLoop && it.loopForward }) {
+            nextInstructionMicrostep(0)
         }
-        nextInstructionMicrostep(1)
+        conditional({ it.isInLoop && !it.loopForward }) {
+            microStep(0) {
+                programCounterDown()
+                microstepCounterReset()
+            }
+        }
+
+        always {
+            microStep(0) {
+                tapeMemoryCounterUp()
+            }
+            nextInstructionMicrostep(1)
+        }
     }
 
-    instruction(PREVIOUS) {
-        microStep(0) {
-            tapeMemoryCounterDown()
+    multiInstruction(PREVIOUS) {
+        conditional({ it.isInLoop && it.loopForward }) {
+            nextInstructionMicrostep(0)
         }
-        nextInstructionMicrostep(1)
+        conditional({ it.isInLoop && !it.loopForward }) {
+            microStep(0) {
+                programCounterDown()
+                microstepCounterReset()
+            }
+        }
+        always {
+            microStep(0) {
+                tapeMemoryCounterDown()
+            }
+            nextInstructionMicrostep(1)
+        }
     }
 
-    instruction(OUTPUT) {
-        microStep(0) {
-            tapeMemoryOut()
-            ioUnitIn()
+    multiInstruction(OUTPUT) {
+        conditional({ it.isInLoop && it.loopForward }) {
+            nextInstructionMicrostep(0)
         }
-        nextInstructionMicrostep(1)
+        conditional({ it.isInLoop && !it.loopForward }) {
+            microStep(0) {
+                programCounterDown()
+                microstepCounterReset()
+            }
+        }
+
+        always {
+            microStep(0) {
+                tapeMemoryOut()
+                ioUnitIn()
+            }
+            nextInstructionMicrostep(1)
+        }
     }
 
     instruction(INPUT) {
@@ -88,13 +146,48 @@ val instructionMemory = InstructionMemoryBuilder {
             nextInstructionMicrostep(0)
         }
     }
+
+    multiInstruction(LOOP_START) {
+        conditional({ it.currentZero }) {
+            microStep(0) {
+                loopCounterUp()
+            }
+            nextInstructionMicrostep(1)
+        }
+
+        always {
+            nextInstructionMicrostep(0)
+        }
+    }
+
+    multiInstruction(LOOP_END) {
+        conditional({ !it.currentZero && it.loopForward }) {
+            microStep(0) {
+                loopCounterDown()
+            }
+            nextInstructionMicrostep(1)
+        }
+
+        conditional({ !it.currentZero && !it.loopForward }) {
+            microStep(0) {
+                loopCounterDown()
+            }
+            microStep(1) {
+                programCounterDown()
+                microstepCounterReset()
+            }
+        }
+
+        always {
+            nextInstructionMicrostep(0)
+        }
+    }
 }.build()
 
 class InstructionMemory(val instructions: Map<Int, List<Instruction>>) {
-    operator fun get(instruction: Int, microstep: Int): ControlLines {
-        return instructions[instruction]?.find { it.condition(CPU.flagRegister) }?.microsteps?.get(microstep)
+    operator fun get(instruction: Int, microstep: Int): ControlLines =
+        instructions[instruction]?.find { it.condition(CPU.flagRegister) }?.microsteps?.get(microstep)
             ?: throw IllegalArgumentException("Unknown instruction $instruction $microstep")
-    }
 }
 
 class Instruction(
