@@ -58,6 +58,18 @@ object CPU {
         cycleCount++
     }
 
+    fun step() {
+        tick()
+        setup()
+    }
+
+    fun stepToNextInstruction() {
+        val currentInstruction = programCounter.currentValue.value
+        while(programCounter.currentValue.value == currentInstruction) {
+            step()
+        }
+    }
+
     fun loadProgram(program: String) {
         reset()
         programMemory.load(assemble(program))

@@ -23,7 +23,7 @@ class MainFrame : JFrame("CPU"), Updatable {
         isVisible = true
         layout = BorderLayout()
 
-        CPU.loadProgram("++|--|.")
+        CPU.loadProgram("++[-]")
         CPU.setup()
 
         add(lights, BorderLayout.CENTER)
@@ -33,7 +33,7 @@ class MainFrame : JFrame("CPU"), Updatable {
             CPU.tick()
             CPU.setup()
             update()
-        }) { CPU.reset(); update() }, BorderLayout.SOUTH)
+        }, { CPU.stepToNextInstruction(); update() }) { CPU.reset(); update() }, BorderLayout.SOUTH)
 
         add(registers, BorderLayout.NORTH)
 

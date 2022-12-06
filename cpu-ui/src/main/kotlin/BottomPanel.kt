@@ -8,12 +8,12 @@ import javax.swing.JPanel
 
 class BottomPanel(
     private val onStepPressed: (ActionEvent) -> Unit,
-    private val onResetPressed: (ActionEvent) -> Unit
+    private val onNextInstructionPressed: (ActionEvent) -> Unit,
+    private val onResetPressed: (ActionEvent) -> Unit,
 ) : JPanel(GridBagLayout()), Updatable {
 
-    private val stepButton = JButton("Step").apply {
-        addActionListener(onStepPressed)
-    }
+    private val stepButton = JButton("Step").apply {addActionListener(onStepPressed)}
+    private val instructionStepButton = JButton("Next Instruction").apply {addActionListener(onNextInstructionPressed)}
 
     init {
         val streamOutputField = StreamOutputField()
@@ -27,12 +27,18 @@ class BottomPanel(
             GridBagConstraints().apply { gridx = 0; gridy = 1; fill = GridBagConstraints.HORIZONTAL; weightx = 1.0 }
         )
 
+        add(
+            instructionStepButton,
+            GridBagConstraints().apply { gridx = 1; gridy = 1; fill = GridBagConstraints.HORIZONTAL; weightx = 1.0 }
+        )
+
         add(JButton("Reset").apply {
             addActionListener(onResetPressed)
-        }, GridBagConstraints().apply { gridx = 1; gridy = 1; fill = GridBagConstraints.HORIZONTAL; weightx = 1.0 })
+        }, GridBagConstraints().apply { gridx = 2; gridy = 1; fill = GridBagConstraints.HORIZONTAL; weightx = 1.0 })
     }
 
     override fun update() {
         stepButton.isEnabled = !CPU.controlLines.halt
+        instructionStepButton.isEnabled = !CPU.controlLines.halt
     }
 }
